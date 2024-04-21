@@ -1,0 +1,108 @@
+<!-- public/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-info {
+            margin-bottom: 20px;
+        }
+
+        .profile-info label {
+            font-weight: bold;
+        }
+
+        .profile-info input[type="text"],
+        .profile-info input[type="email"],
+        .profile-info textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .profile-info textarea {
+            resize: vertical;
+        }
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <h1>User Profile</h1>
+    <div class="profile-info">
+        <label for="name">Name:</label>
+        <input type="text" id="name" placeholder="Enter your name" disabled>
+    </div>
+    <div class="profile-info">
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Enter your email" disabled>
+    </div>
+    <div class="profile-info">
+        <label for="bio">Bio:</label>
+        <textarea id="bio" placeholder="Enter your bio" disabled></textarea>
+    </div>
+    <button onclick="getUserProfile()">Get Profile</button>
+    <button onclick="editProfile()">Edit Profile</button>
+    <button onclick="saveUserProfile()">Save Profile</button>
+</div>
+
+<script>
+    function editProfile() {
+        document.getElementById('name').readOnly = false;
+        document.getElementById('email').readOnly = false;
+        document.getElementById('bio').readOnly = false;
+    }
+
+    async function getUserProfile() {
+        const response = await fetch('/api/profile');
+        const data = await response.json();
+        document.getElementById('name').textContent = data.name;
+        document.getElementById('email').textContent = data.email;
+        document.getElementById('bio').textContent = data.bio;
+    }
+
+    async function saveUserProfile() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const bio = document.getElementById('bio').value;
+
+        const response = await fetch('/api/profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name, email, bio})
+        });
+
+        if (response.ok) {
+            alert('User profile saved successfully!');
+        } else {
+            alert('Failed to save user profile!');
+        }
+    }
+</script>
+</body>
+</html>
