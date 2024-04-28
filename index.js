@@ -1,44 +1,54 @@
 const express = require('express');
-const app = express();
+let path = require('path');
+const fs = require("fs");
 const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
+const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+let mongoUrlLocal = "mongodb://admin:password@nodejs-app-mongodb";
+let mongoClientOptions = { useNewUrlParser: true, useUnifiedTopology: true };
+let databaseName = "my-db";
+
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get('/api/message', (req, res) => {
-    res.json({ message: 'Hello, world!' });
+app.get('/profile-picture', function (req, res) {
+    let img = fs.readFileSync(path.join(__dirname, "images/profile-1.jpg"));
+    res.writeHead(200, {'Content-Type': 'image/jpg' });
+    res.end(img, 'binary');
 });
 
-app.get('/api/profile', (req, res) => {
-    // Mock user profile data
-    MongoClient.connect('mongodb://admin:password@localhost:27017', (err, client) => {
+app.get('/get-profile', function (req, res) {
+    let response = {};
+    // Connect to the db
+    MongoClient.connect(mongoUrlLocal, mongoClientOptions, function (err, client) {
+        console.log('Connected to MongoDB', err, client);
         if (err) throw err;
-        const db = client.db('user-account');
-        const query = { userid: 1 };
-        db.collection('users').findOne(query, (err, result) => {
+
+        let db = client.db(databaseName);
+
+        let myquery = { userid: 1 };
+
+        db.collection("users").findOne(myquery, function (err, result) {
             if (err) throw err;
+            response = result;
             client.close();
-            res.send(result);
+
+            // Send response
+            res.send(response ? response : {});
         });
     });
-    // const userProfile = {
-    //     name: 'John Doe',
-    //     email: 'john@example.com',
-    //     bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eget dignissim urna.'
-    // };
-    // res.json(userProfile);
 });
 
 app.post('/api/update-profile', (req, res) => {
     const userObj = req.body;
-    MongoClient.connect('mongodb://admin:password@localhost:27017', (err, client) => {
+    MongoClient.connect('mongodb://admin:password@localhost:27017', mongoClientOptions, (err, client) => {
         if (err) throw err;
-        const db = client.db('user-account');
+        const db = client.db(databaseName);
         userObj.userid = 1;
 
         const query = { userid: 1 };

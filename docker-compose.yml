@@ -2,14 +2,11 @@ version: '3'
 services:
   nodejs-app-web:
     build: .
+#    image: 562720243559.dkr.ecr.ap-south-1.amazonaws.com/docker-apps:1.3
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-    depends_on:
-      - nodejs-app-mongodb
-    links:
-      - nodejs-app-mongodb
+#    environment:
+#        MONGO_URL: mongodb://admin:password@nodejs-app-mongodb:27017
   nodejs-app-mongodb:
     image: mongo
     ports:
